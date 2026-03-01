@@ -1,5 +1,5 @@
 # ticketGraph.py
-# import sys
+import sys
 # import os
 from pathlib import Path
 import pandas as pd
@@ -33,12 +33,15 @@ def load_metric_csv(pathlike: str) -> pd.DataFrame:
     tnums = sorted((int(c[1:]), c) for c in tcols)
     t_sorted = [c for _, c in tnums]
     df = df.set_index("Run")[t_sorted]
-
+    
     all_nan = df.columns[df.isna().all()]
     if len(all_nan):
         print(f"[WARN] {path.name}: dropped {len(all_nan)} all-NaN columns.")
 
     df = df.dropna(axis=1, how="all")
+    
+    # Drop row where Run index starts with "Step 10"
+    df = df[~df.index.str.startswith("Step 10")]
 
     counts = df.notna().sum(axis=1).sort_values(ascending=True)
     print(f"\n[AUDIT] {path.name}: {len(df)} runs, {df.shape[1]} time points")
@@ -99,8 +102,10 @@ def plot_metric(ax, df: pd.DataFrame, title: str, ylabel: str):
     ax.set_title(title)
     ax.set_xlabel("Time Step")
     ax.set_ylabel(ylabel)
-
-
+    
+    # Add vertical dashed lines at x=125 and x=250
+    ax.axvline(x=125, color='gray', linestyle='--', linewidth=1, alpha=0.7)
+    ax.axvline(x=250, color='gray', linestyle='--', linewidth=1, alpha=0.7)
 
     handles, labels = ax.get_legend_handles_labels()
     clean_labels = []
@@ -111,13 +116,13 @@ def plot_metric(ax, df: pd.DataFrame, title: str, ylabel: str):
         # Case 1: label contains "Step X"
         m = re.search(r"Step\s*(\d+)", lab)
         if m:
-            clean_labels.append(f"Step {m.group(1)}")
+            clean_labels.append(f"Cost {m.group(1)}")
             continue
 
         # Case 2: numeric run label like 50315 → step is first 1–2 digits
         m = re.match(r"(\d{1,2})", lab)
         if m:
-            clean_labels.append(f"Step {m.group(1)}")
+            clean_labels.append(f"Cost {m.group(1)}")
             continue
 
         # Fallback (shouldn't really happen)
@@ -126,51 +131,25 @@ def plot_metric(ax, df: pd.DataFrame, title: str, ylabel: str):
     ax.legend(handles, clean_labels, fontsize="small", ncol=2)
 
 
-# Uncomment one block at a time:
+# Get prefix from command line argument
+if len(sys.argv) < 2:
+    print("Usage: python ticketGraph.py <PREFIX>")
+    print("Example: python ticketGraph.py LR2M15")
+    sys.exit(1)
 
-# # L01M
-# pop_df      = load_metric_csv("dataLists/useful/L01M_P.csv")
-# gene_df     = load_metric_csv("dataLists/useful/L01M_G.csv")
-# social_df   = load_metric_csv("dataLists/useful/L01M_ST.csv")
-# learning_df = load_metric_csv("dataLists/useful/L01M_LT.csv")
+prefix = sys.argv[1]
 
-# # L02M
-# pop_df      = load_metric_csv("dataLists/useful/L02M_P.csv")
-# gene_df     = load_metric_csv("dataLists/useful/L02M_G.csv")
-# social_df   = load_metric_csv("dataLists/useful/L02M_ST.csv")
-# learning_df = load_metric_csv("dataLists/useful/L02M_LT.csv")
-
-# # L03M
-# pop_df      = load_metric_csv("dataLists/useful/L03M_P.csv")
-# gene_df     = load_metric_csv("dataLists/useful/L03M_G.csv")
-# social_df   = load_metric_csv("dataLists/useful/L03M_ST.csv")
-# learning_df = load_metric_csv("dataLists/useful/L03M_LT.csv")
-
-# # L01M15
-# pop_df      = load_metric_csv("dataLists/useful/LR1M15_P.csv")
-# gene_df     = load_metric_csv("dataLists/useful/LR1M15_G.csv")
-# social_df   = load_metric_csv("dataLists/useful/LR1M15_ST.csv")
-# learning_df = load_metric_csv("dataLists/useful/LR1M15_LT.csv")
-
-# # L02M15
-pop_df      = load_metric_csv("dataLists/useful/LR2M15_P.csv")
-gene_df     = load_metric_csv("dataLists/useful/LR2M15_G.csv")
-social_df   = load_metric_csv("dataLists/useful/LR2M15_ST.csv")
-learning_df = load_metric_csv("dataLists/useful/LR2M15_LT.csv")
-
-
-# L03M15
-# pop_df      = load_metric_csv("dataLists/useful/LR3M15_P.csv")
-# gene_df     = load_metric_csv("dataLists/useful/LR3M15_G.csv")
-# social_df   = load_metric_csv("dataLists/useful/LR3M15_ST.csv")
-# learning_df = load_metric_csv("dataLists/useful/LR3M15_LT.csv")
+pop_df      = load_metric_csv(f"dataLists/useful/{prefix}_P.csv")
+gene_df     = load_metric_csv(f"dataLists/useful/{prefix}_G.csv")
+social_df   = load_metric_csv(f"dataLists/useful/{prefix}_ST.csv")
+learning_df = load_metric_csv(f"dataLists/useful/{prefix}_LT.csv")
 
 
 plots = [
     (pop_df,      "Population over Time",       "Population"),
-    (gene_df,     "Gene Tickets over Time",     "Gene Ticket Count"),
-    (social_df,   "Social Tickets over Time",   "Social Ticket Count"),
-    (learning_df, "Learning Tickets over Time", "Learning Ticket Count"),
+    (gene_df,     "Gene Bonus over Time",     "Gene Bonus"),
+    (social_df,   "Social Learning Events over Time",   "Social Learning Event Count"),
+    (learning_df, "Individual Learning Events over Time", "Individual Learning Event Count"),
 ]
 
 fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
@@ -183,8 +162,8 @@ for ax in axes[len(plots):]:
     ax.axis("off")
 
 plt.tight_layout()
+plt.savefig(f"{prefix}.png", dpi=300)
 plt.show()
-
 
 
 

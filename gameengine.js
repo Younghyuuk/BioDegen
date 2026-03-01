@@ -146,8 +146,10 @@ class GameEngine {
     loop() {
         this.clockTick = this.timer.tick();
        
-       
-        this.update();
+        let numUpdates = 10;
+        for (let i = 0; i < numUpdates; i++) {
+            this.update();
+        }
         this.draw();
        
     };

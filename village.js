@@ -21,6 +21,11 @@ class Village {
         this.villageSocial = [];
         this.villageAverageGenes = [];
 
+        this.allGeneValues = [];
+        this.allLearningGeneValues = [];
+        this.allSocialGeneValues = [];
+        this.allMemeValues = [];
+
         this.isSelected = false;
 
         this.addHuman(new Human(this));
@@ -99,6 +104,10 @@ class Village {
     
         let genesLength = this.population[0].genes.length;
     
+        this.allGeneValues = [];
+        this.allLearningGeneValues = [];
+        this.allSocialGeneValues = [];
+        this.allMemeValues = [];
         //  the populationSize here is what may cause the issue with inconsistent data sending for village
         for (let i = 0; i < populationSize; i++) {
             let individual = this.population[i];
@@ -108,7 +117,11 @@ class Village {
             // Summing up all traits for average calculation
             for (let j = 0; j < genesLength - 2; j++) {
                 totalGeneTraits += individual.genes[j];
+                this.allGeneValues.push(individual.genes[j]);
+                this.allMemeValues.push(individual.memes[j]);
             }
+            this.allLearningGeneValues.push(individual.genes[genesLength - 2]);
+            this.allSocialGeneValues.push(individual.genes[genesLength - 1]);
         }
     
         // Calculate averages and push to graph data arrays

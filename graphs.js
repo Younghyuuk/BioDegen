@@ -73,49 +73,47 @@
 // const bioRun6 = ["Step 5 l01M15" ,  "Step 7 l01M15",  "Step 9 l01M15",  "Step 10 l01M15",  "Step 11 l01M15",  "Step 13 l01M15", "Step 15 l01M15"];
                  
 const bioRun6 = ["Step 5 l02M15" ,  "Step 7 l02M15",  "Step 9 l02M15",  "Step 10 l02M15",  "Step 11 l02M15",  "Step 13 l02M15", "Step 15 l02M15"];
-// const bioRunAll = [
+const bioRunAll = [
 
 //   // ===== CONTROL (Step 0, learning/social enabled) =====
-//   "Step 0 l01M15 (control)",
-//   "Step 0 l02M15 (control)",
-//   "Step 0 l03M15 (control)",
+  "6 Step 0 l01M15 (control)",
+  "6 Step 0 l02M15 (control)",
+  "6 Step 0 l03M15 (control)",
 
 
 //   // ===== LR 0.01 — NO LEARNING / SOCIAL =====
-//   "Step 0 l01M15 (no learn/social)",
-//   "Step 5 l01M15 (no learn/social)",
-//   "Step 7 l01M15 (no learn/social)",
-//   "Step 9 l01M15 (no learn/social)",
-//   "Step 10 l01M15 (no learn/social)",
-//   "Step 11 l01M15 (no learn/social)",
-//   "Step 13 l01M15 (no learn/social)",
-//   "Step 15 l01M15 (no learn/social)",
+  "6 Step 0 l01M15 (no learn/social)",
+  "6 Step 5 l01M15 (no learn/social)",
+  "6 Step 7 l01M15 (no learn/social)",
+  "6 Step 9 l01M15 (no learn/social)",
+  "6 Step 11 l01M15 (no learn/social)",
+  "6 Step 13 l01M15 (no learn/social)",
+  "6 Step 15 l01M15 (no learn/social)",
 
+  // OG
+  "6 Step 5 l01M15",  
+  "6 Step 7 l01M15",  
+  "6 Step 9 l01M15",  
+  "6 Step 11 l01M15",  
+  "6 Step 13 l01M15", 
+  "6 Step 15 l01M15",
+  
+  "6 Step 5 l02M15" ,  
+  "6 Step 7 l02M15",  
+  "6 Step 9 l02M15",  
+  "6 Step 11 l02M15",  
+  "6 Step 13 l02M15", 
+  "6 Step 15 l02M15",
+                  
+  "6 Step 5 l03M15" ,  
+  "6 Step 7 l03M15",
+  "6 Step 9 l03M15",   
+  "6 Step 11 l03M15",  
+  "6 Step 13 l03M15", 
+  "6 Step 15 l03M15"
+];
 
-//   // ===== LR 0.02 — NO LEARNING / SOCIAL =====
-//   "Step 0 l02M15 (no learn/social)",
-//   "Step 5 l02M15 (no learn/social)",
-//   "Step 7 l02M15 (no learn/social)",
-//   "Step 9 l02M15 (no learn/social)",
-//   "Step 10 l02M15 (no learn/social)",
-//   "Step 11 l02M15 (no learn/social)",
-//   "Step 13 l02M15 (no learn/social)",
-//   "Step 15 l02M15 (no learn/social)",
-
-
-//   // ===== LR 0.03 — NO LEARNING / SOCIAL =====
-//   "Step 0 l03M15 (no learn/social)",
-//   "Step 5 l03M15 (no learn/social)",
-//   "Step 7 l03M15 (no learn/social)",
-//   "Step 9 l03M15 (no learn/social)",
-//   "Step 10 l03M15 (no learn/social)",
-//   "Step 11 l03M15 (no learn/social)",
-//   "Step 13 l03M15 (no learn/social)",
-//   "Step 15 l03M15 (no learn/social)"
-
-// ];
-
-
+var actualRun = bioRunAll; // change this to bioRun1, bioRun2, etc. to graph specific sets of runs instead of all of them.
 var socket = io.connect("https://73.19.38.112:8888");
 
 socket.on("connect", function () {
@@ -320,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const cellH     = graphH * 2 + 10;
   
    // … inside your click handler, after grabbing margin, gapY, cellH, etc.
-      const runsCount = bioRun6.length;
+      const runsCount = actualRun.length;
       const rows     = Math.ceil(runsCount / cols);
 
       // compute exactly how tall the canvas needs to be:
@@ -331,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // now your loop will never paint past the bottom edge
       for (let i = 0; i < runsCount; i++) {
         // … draw each cell as before
-        const runName = bioRun6[i];
+        const runName = actualRun[i];
         const col = i % cols, row = Math.floor(i / cols);
         const baseX = margin + col * (cellW + gapX);
         const baseY = margin + row * (cellH + gapY);
@@ -347,7 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
           socket.once("find", data => res(data || []))
         );
         if (!docs.length) continue;
-  
+        
         // Compute averages
         const avgPop    = averagePopulation(docs);
         const avgGene   = averageGeneTickets(docs);
@@ -370,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
           baseY,
           { day: avgPop.length },
           [ avgPop ],
-          `${runName} — Population`,
+          `${runName} — Population — ${docs.length} runs`,
           ["Population"]
         );
         popG.xSize = graphW;         
@@ -384,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
           baseY + graphH + 10,
           { day: avgGene.length },
           [ avgGene, avgSocial, avgLearn ],
-          `${runName} — Tickets`,
+          `${runName} — Tickets — ${docs.length} runs`,
           ["Gene","Social","Learning"]
         );
         tickG.xSize = graphW;              
@@ -527,7 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //     // We’ll store each run’s four averages in an object:
     const allAverages = [];
-     for (let runName of bioRun6) {
+     for (let runName of actualRun) {
       // Fetch ALL documents for this run from MongoDB
       socket.emit("find", {
         db:         PARAMETERS.db,

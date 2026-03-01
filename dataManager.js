@@ -13,6 +13,20 @@ class DataManager {
         this.villageSocial = [];
         this.villageAverageGenes = [];
 
+        this.genesHistogramData = [];
+        this.learningHistogramData = [];
+        this.socialHistogramData = [];
+        this.memeHistogramData = [];
+
+        this.geneHistogram = new Histogram(1020, 600, this.genesHistogramData, {label: "Gene Distribution"});
+        gameEngine.addEntity(this.geneHistogram);
+        this.learningHistogram = new Histogram(1020, 700, this.learningHistogramData, {label: "Learning Trait Distribution"});
+        gameEngine.addEntity(this.learningHistogram);
+        this.socialHistogram = new Histogram(1020, 800, this.socialHistogramData, {label: "Social Trait Distribution"});
+        gameEngine.addEntity(this.socialHistogram);
+        this.memeHistogram = new Histogram(1020, 900, this.memeHistogramData, {label: "Meme Trait Distribution"});
+        gameEngine.addEntity(this.memeHistogram);
+    
         // this.villageLearning = Array.from({length: world.worldDimension}, () => []);
         // this.villageSocial = Array.from({length: world.worldDimension}, () => []);
         // this.villageAverageGenes = Array.from({length: world.worldDimension}, () => []);
@@ -52,7 +66,10 @@ class DataManager {
                 geneTickets: this.geneGraph,
                 learningTickets: this.learningGraph,
                 socialTickets: this.socialGraph,
-                
+                geneHistogram: this.genesHistogramData,
+                learningHistogram: this.learningHistogramData,
+                socialHistogram: this.socialHistogramData,
+                memeHistogram: this.memeHistogramData,
                 //  pulls directly from the current village we have clicked and gets the data from that village 
                 // instead of it just pushing one list of these tickets for one village we want all the villages and for each of these lists to be 
                 //  a list of lists for every village
@@ -70,6 +87,40 @@ class DataManager {
 
          console.log(`Total villages logged: ${this.villageLearning.length}`);
     };
+
+    updateHistogramData() {
+        let geneHistogram = new Array(20).fill(0);
+        let learningHistogram = new Array(20).fill(0);
+        let socialHistogram = new Array(20).fill(0);
+        let memeHistogram = new Array(20).fill(0);
+
+        for (let i = 0; i < PARAMETERS.worldDimension; i++) {
+            for (let j = 0; j < PARAMETERS.worldDimension; j++) {
+                let village = this.world.world[i][j];
+                village.allGeneValues.forEach(value => {
+                    let index = Math.min(value, 19);
+                    geneHistogram[index]++;
+                });
+                village.allLearningGeneValues.forEach(value => {
+                    let index = Math.min(value, 19);
+                    learningHistogram[index]++;
+                });
+                village.allSocialGeneValues.forEach(value => {
+                    let index = Math.min(value, 19);
+                    socialHistogram[index]++;
+                });
+                village.allMemeValues.forEach(value => {
+                    let index = Math.min(value, 19);
+                    memeHistogram[index]++;
+                });
+            }
+        }
+
+        this.genesHistogramData.push(geneHistogram);
+        this.learningHistogramData.push(learningHistogram);
+        this.socialHistogramData.push(socialHistogram);
+        this.memeHistogramData.push(memeHistogram);
+    }
 
     // make a function here called clearData()
     // clearData() {

@@ -56,6 +56,8 @@ class World {
         let totalAvgTraits = 0;
         let villageCount = 0;
         
+        this.data.updateHistogramData();
+
         for (let i = 0; i < PARAMETERS.worldDimension; i++) {
             for (let j = 0; j < PARAMETERS.worldDimension; j++) {
                 let villagePop = this.world[i][j].population.length;
@@ -71,7 +73,6 @@ class World {
                             let sumOfFirstTenGenes = agent.genes.slice(0, 10).reduce((acc, curr) => acc + curr, 0);
                             geneTraits += sumOfFirstTenGenes/10; // Add this sum to geneTraits
                         }
-                      
                     }
                     // Averages for this village
                     totalLearningTAverage += learningT / villagePop;
